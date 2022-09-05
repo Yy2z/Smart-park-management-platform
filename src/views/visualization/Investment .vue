@@ -1,7 +1,7 @@
-<!-- 数据可视 -->
 <template>
     <div>
-        数据可视
+        设备
+
     </div>
 </template>
 <script setup>

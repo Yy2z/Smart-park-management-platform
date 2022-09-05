@@ -33,7 +33,12 @@ const manageroutes = [
       {
          path: '/visualization',
          name: 'visualization',
-         component: () => import('../views/visualization.vue')
+         component: () => import('../views/visualization/visheader.vue')
+      },
+      {
+         path: '/cockpit',
+         name: 'cockpit',
+         component: () => import('../views/visualization/cockpit.vue')
       },
       
  ]
