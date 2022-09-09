@@ -34,7 +34,7 @@ export default defineConfig({
     https: false,
     proxy: {
       '/api': {
-        target: 'http://xxx.xxx.xxx.xxx:9999', //后端服务实际地址
+        target: 'http://132.232.110.185:80', //后端服务实际地址
         changeOrigin: true, //开启代理
         rewrite: (path) => path.replace(/^\/api/, ''),
       },
