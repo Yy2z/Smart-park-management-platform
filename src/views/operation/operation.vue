@@ -135,6 +135,10 @@ const handleClose = (key: string, keyPath: string[]) => {
 </script>
 
 <style scoped>
+  .el-container  {
+  height: 100%;
+} 
+
 .Aside{
   background-color: #415c85;
 }
