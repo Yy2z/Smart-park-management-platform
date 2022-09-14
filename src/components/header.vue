@@ -20,9 +20,19 @@
     <el-icon>
      <Bell />
     </el-icon>
-    <el-icon>
+    <el-dropdown>
+    <span class="el-dropdown-link">
+      <el-icon>
       <Avatar />
     </el-icon>
+    </span>
+    <template #dropdown>
+      <el-dropdown-menu>
+        <el-dropdown-item @click="logout">退出</el-dropdown-item>
+      </el-dropdown-menu>
+    </template>
+  </el-dropdown>
+ 
   </el-menu>
 </template>
 
@@ -39,6 +49,9 @@ const activeIndex = ref('1')
 // 点击事件，路由跳转
 let open = name => {
   router.push({name})
+}
+const logout = () => {
+  router.replace('/login')
 }
 
 
