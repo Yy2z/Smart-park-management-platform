@@ -3,7 +3,7 @@
     <el-header>
       <div class="title">
         <span class="headerimg"></span>
-        <span class="headerTitle">项目信息详情</span>
+        <span class="headerTitle">告警规则详情</span>
       </div>
       <span>
         <el-button type="warning" @click="close">关闭</el-button>
@@ -14,15 +14,15 @@
       <div class="leftFormBox">
         <div class="leftbox"><div>项目基本信息</div></div>
         <div class="justifybetween">
-          <div style="width: 45%">
+          <div>
             <el-form-item label="项目名称：" prop="projectName" size="large">
               <el-input
-                v-model="FormData.projectName"
+                v-model="leftFormData.projectName"
                 placeholder="请输入项目名称"
               />
             </el-form-item>
             <div class="flex-cow">
-              <div style="width: 100%">
+              <div>
                 <el-form-item
                   label="项目编号："
                   prop="projectNumber"
@@ -30,16 +30,16 @@
                 >
                   <el-input
                     oninput="value=value.replace(/[^\d.]/g,'')"
-                    v-model="FormData.projectNumber"
+                    v-model="leftFormData.phone"
                     placeholder="请输入项目编号"
                   />
                 </el-form-item>
                 <el-form-item label="用户类型：" prop="userType" size="large">
                   <el-select
+                    v-model="value1"
                     class="m-2"
                     placeholder="请选择"
                     size="large"
-                    v-model="FormData.userType"
                   >
                     <el-option
                       v-for="item in userTypeoptions"
@@ -53,23 +53,23 @@
                   <div class="demo-date-picker">
                     <div class="block">
                       <el-date-picker
+                        v-model="value1"
                         type="date"
                         placeholder="请选择日期时间"
                         :size="size"
-                        v-model="FormData.startTime"
                       />
                     </div>
                   </div>
                 </el-form-item>
               </div>
-              <div style="margin-left: 20px; width: 100%">
+              <div style="margin-left: 20px">
                 <el-form-item
                   label="项目类型："
                   prop="projectType"
                   size="large"
                 >
                   <el-select
-                    v-model="FormData.projectType"
+                    v-model="value2"
                     class="m-2"
                     placeholder="请选择"
                     size="large"
@@ -88,7 +88,7 @@
                   size="large"
                 >
                   <el-select
-                    v-model="FormData.projectStatus"
+                    v-model="value3"
                     class="m-2"
                     placeholder="请选择"
                     size="large"
@@ -109,7 +109,7 @@
                   <div class="demo-date-picker">
                     <div class="block">
                       <el-date-picker
-                        v-model="FormData.onlineTime"
+                        v-model="value2"
                         type="date"
                         placeholder="请选择日期时间"
                         :size="size"
@@ -120,9 +120,9 @@
               </div>
             </div>
           </div>
-          <div style="width: 50%">
+          <div>
             <el-form-item label="项目地址：" prop="projectName" size="large">
-              <el-input v-model="FormData.projectAddres" />
+              <el-input v-model="leftFormData.name" />
             </el-form-item>
             <el-col :span="14">
               <img
@@ -423,7 +423,7 @@
       </div>
     </div>
     <el-footer style="padding: 0 0 10% 40%">
-      <el-button type="primary" size="large" @click="save">保存</el-button>
+      <el-button type="primary" size="large">保存</el-button>
       <el-button style="margin-left: 5%" size="large" @click="close"
         >取消</el-button
       >
@@ -435,47 +435,7 @@
 import { reactive, ref } from "@vue/reactivity";
 import { ElMessageBox } from "element-plus";
 import { useRouter } from "vue-router";
-import { addProject } from "../../api/configuration.js";
 const $router = useRouter();
-const FormData = reactive({
-  projectNumber: "",
-  projectName: "",
-  projectStatus: "",
-  projectType: "",
-  startTime: "",
-  userType: "",
-  onlineTime: "",
-  projectAddres: "",
-  acceptanceReport: "",
-  commencementReport: "",
-  equipmentList: "",
-  equipmentReport: "",
-  installationDrawings: "",
-  manual: "",
-  projectManagementId: "",
-});
-const save = () => {
-  console.log(FormData.projectNumber);
-  addData();
-};
-const cancel = () => {
-  FormData.projectNumber = "";
-  FormData.projectName = "";
-  FormData.userType = "";
-  FormData.projectStatus = "";
-  FormData.projectType = "";
-  FormData.startTime = "";
-  FormData.onlineTime = "";
-  FormData.projectAddres = "";
-};
-6;
-// 添加数据的异步函数
-async function addData() {
-  // 发送请求 接受请求回来的数据 并且重命名为 res
-  const { data: res } = await addProject(FormData);
-  console.log(res);
-  // console.log(333);
-}
 
 const userTypeoptions = [
   {

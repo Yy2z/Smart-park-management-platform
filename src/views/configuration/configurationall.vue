@@ -10,7 +10,9 @@
               <div class="header-left-text">项目信息管理</div>
             </div>
             <div class="flexD-cow">
-              <button class="btn-style btn-add" @click="toAdd">新增</button>
+              <router-link to="/addProject">
+                <button class="btn-style btn-add">新增</button>
+              </router-link>
               <button class="btn-style btn-del">批量删除</button>
             </div>
           </div>
@@ -20,30 +22,31 @@
             <div class="input-box">
               <div class="flexD-cow">
                 <div class="input-text">项目名称：</div>
-                <el-input v-model="input" placeholder="请输入项目名称" />
+                <el-input v-model="inputContent" placeholder="请输入项目名称" />
               </div>
               <div class="flexD-cow">
                 <div class="input-text">项目编号：</div>
-                <el-input v-model="input" placeholder="请输入项目编号" />
+                <el-input
+                  v-model="inputContent1"
+                  placeholder="请输入项目编号"
+                />
               </div>
               <div class="flexD-cow">
                 <div>项目状态：</div>
                 <el-select
-                  v-model="value"
+                  v-model="select"
                   class="m-2"
                   placeholder="请选择"
                   size="large"
                 >
-                  <el-option
-                    v-for="item in options"
-                    :key="item.value"
-                    :label="item.label"
-                    :value="item.value"
-                  />
+                  <el-option label="图文" value="1" />
+                  <el-option label="视频" value="2" />
                 </el-select>
               </div>
               <div class="flexD-cow">
-                <button class="btn-style btn-chax">查询</button>
+                <button class="btn-style btn-chax" @click="searchput">
+                  查询
+                </button>
                 <button class="btn-style btn-res">重置</button>
               </div>
             </div>
@@ -51,7 +54,12 @@
             <div class="table-div">
               <el-table
                 ref="multipleTableRef"
-                :data="tableData"
+                :data="
+                  tables[0].slice(
+                    (currentPage - 1) * pageSize,
+                    currentPage * pageSize
+                  )
+                "
                 style="width: 100%"
                 :border="true"
                 @selection-change="handleSelectionChange"
@@ -61,20 +69,24 @@
                   width="55"
                   class="warning-row"
                 />
-                <el-table-column property="Xname" label="项目名称" />
-                <el-table-column property="Xnum" label="项目编号" />
-                <el-table-column property="Xlei" label="项目类型" />
-                <el-table-column property="Xaddre" label="项目地址" />
-                <el-table-column property="Xperson" label="用户类型" />
-                <el-table-column property="Xtai" label="项目状态" />
-                <el-table-column label="预计上线时间">
-                  <template #default="scope">{{ scope.row.date }}</template>
-                </el-table-column>
+                <el-table-column property="projectName" label="项目名称" />
+                <el-table-column property="projectNumber" label="项目编号" />
+                <el-table-column property="projectType" label="项目类型" />
+                <el-table-column property="projectAddres" label="项目地址" />
+                <el-table-column property="userType" label="用户类型" />
+                <el-table-column property="projectStatus" label="项目状态" />
+                <el-table-column property="startTime" label="预计上线时间" />
                 <el-table-column label="操作">
-                  <el-button @click="handleEdit()">详情</el-button>
-                  <el-button type="danger" @click="handleDelete()"
-                    >删除</el-button
-                  >
+                  <template #default="scope">
+                    <router-link to="/showProject">
+                      <el-button @click="showshowProject(scope.row)"
+                        >详情</el-button
+                      >
+                    </router-link>
+                    <el-button type="danger" @click="delate(scope.row)"
+                      >删除</el-button
+                    >
+                  </template>
                 </el-table-column>
               </el-table>
             </div>
@@ -82,9 +94,7 @@
             <div class="pagin-div">
               <div class="demo-pagination-block">
                 <el-pagination
-                  v-model:currentPage="currentPage1"
-                  v-model:page-size="pageSize1"
-                  :page-sizes="[10, 20, 30, 40]"
+                  :page-size="pageSize"
                   background
                   layout="total, prev, pager, next,  sizes, jumper"
                   :total="100"
@@ -99,18 +109,138 @@
     </el-container>
   </el-container>
 </template>
-<script setup>
-import { reactive } from "@vue/reactivity";
-import { ref } from "vue";
+<script lang="ts">
+import { ref, onMounted, reactive } from "vue";
 import * as ElIcons from "@element-plus/icons-vue";
 import { useRouter } from "vue-router";
+import { getProject, cancelProject } from "../../api/configuration.js";
 const $router = useRouter();
-function toAdd() {
-  $router.replace({ path: "/addProject" });
-}
-function handleEdit() {
-  $router.replace({ path: "/showProject" });
-}
+export default {
+  data() {
+    return {
+      dialogFormVisible: false,
+      currentPage: 1,
+      pageSize: 6,
+      searchContent: "",
+      inputContent: "",
+      inputContent1: "",
+      select: "",
+      selMsg: [],
+      cancelParm: {
+        title: "",
+      },
+    };
+  },
+  setup() {
+    // 访客列表数据
+    const tableData1 = reactive([]);
+    // 访客列表总数
+    let count1 = 0;
+
+    // 获取访客需要的参数
+    let getVisitorParms = {
+      limit: "4", // 获取第几页的数据
+      page: "1", // 获取几条数据
+    };
+
+    onMounted(() => {
+      // 调用获取访客的函数
+      getArticleData();
+    });
+    // 获取访客的异步函数
+    async function getArticleData() {
+      // 发送请求 接受请求回来的数据 并且重命名为 res
+      const { data: res } = await getProject(getVisitorParms);
+      // 返回的数据展开 push到数组中
+      tableData1.push(...res.data);
+      // 总数重新赋值
+      count1 = res.count;
+      console.log(tableData1);
+      console.log(res.data);
+    }
+    return {
+      tableData1,
+    };
+  },
+  components: {},
+
+  computed: {
+    tables() {
+      const search = this.searchContent;
+      if (this.inputContent == "") {
+        this.searchContent = "";
+        this.currentPage = 1;
+        return [this.tableData1, (this.count = this.tableData1.length)];
+      }
+      if (search !== "") {
+        return [
+          this.tableData1.filter((dataNews) => {
+            return Object.keys(dataNews).some((key) => {
+              return String(dataNews[key]).toLowerCase().indexOf(search) > -1;
+            });
+          }),
+          (this.count = this.tableData1.filter((dataNews) => {
+            return Object.keys(dataNews).some((key) => {
+              return String(dataNews[key]).toLowerCase().indexOf(search) > -1;
+            });
+          }).length),
+        ];
+      }
+      return [this.tableData1, (this.count = this.tableData1.length)];
+    },
+  },
+  methods: {
+    addOk() {
+      this.dialogFormVisible = false;
+    },
+    addCancel() {
+      this.dialogFormVisible = false;
+    },
+    handleSizeChange(val) {
+      this.pageSize = val;
+    },
+    handleCurrentChange(val) {
+      this.currentPage = val;
+    },
+    //搜索
+    searchput() {
+      this.searchContent = this.inputContent;
+    },
+    // 重置搜索框内容
+    reStart() {
+      this.inputContent = "";
+    },
+    //获取选中的行数据
+    delate(row) {
+      this.cancelProject.projectNumber = row.projectNumber;
+      let pk = this.cancelProject.projectNumber;
+      console.log(pk);
+      mycancel();
+      async function mycancel() {
+        // 发送请求 接受请求回来的数据 并且重命名为 res
+        const { data: res } = await cancelProject(pk);
+        console.log(res);
+        location.reload();
+      }
+    },
+    showshowProject(row) {
+      console.log(row);
+      console.log(row.projectAddres);
+      console.log(1111111);
+    },
+  },
+};
+const multipleTableRef = ref<InstanceType<typeof ElTable>>();
+const multipleSelection = ref<User[]>([]);
+const toggleSelection = (rows?: User[]) => {
+  if (rows) {
+    rows.forEach((row) => {
+      multipleTableRef.value!.toggleRowSelection(row, undefined);
+    });
+  } else {
+    multipleTableRef.value!.clearSelection();
+  }
+};
 const value = ref("");
 const options = [
   {

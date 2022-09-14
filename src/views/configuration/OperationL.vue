@@ -51,7 +51,11 @@
                   <template #default="scope">{{ scope.row.date }}</template>
                 </el-table-column>
                 <el-table-column label="操作">
-                  <el-button @click="handleEdit()">详情</el-button>
+                  <router-link to="/showOperationL">
+                    <el-button @click="showshowProject(scope.row)"
+                      >详情</el-button
+                    >
+                  </router-link>
                   <el-button type="danger" @click="handleDelete()"
                     >删除</el-button
                   >
@@ -82,7 +86,9 @@
 <script setup>
 import { reactive } from "@vue/reactivity";
 import { ref } from "vue";
+import { useRouter } from "vue-router";
 import * as ElIcons from "@element-plus/icons-vue";
+const $router = useRouter();
 const value = ref("");
 const tableData = [
   {

@@ -3,7 +3,7 @@
     <el-header>
       <div class="title">
         <span class="headerimg"></span>
-        <span class="headerTitle">项目信息详情</span>
+        <span class="headerTitle">操作日志详情</span>
       </div>
       <span>
         <el-button type="warning" @click="close">关闭</el-button>

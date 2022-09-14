@@ -11,7 +11,9 @@
               <div class="header-left-text">告警规则管理</div>
             </div>
             <div class="flexD-cow">
-              <button class="btn-style btn-add" @click="toAdd">新增</button>
+              <router-link to="/addAlarm">
+                <button class="btn-style btn-add" to="/addAlarm">新增</button>
+              </router-link>
               <button class="btn-style btn-del">批量删除</button>
             </div>
           </div>
@@ -21,7 +23,7 @@
             <div class="input-box">
               <div class="flexD-cow">
                 <div class="input-text">告警名称：</div>
-                <el-input v-model="input" placeholder="请输入项目名称" />
+                <el-input v-model="inputContent" placeholder="请输入项目名称" />
               </div>
               <div class="flexD-cow">
                 <div>推送方式：</div>
@@ -40,7 +42,9 @@
                 </el-select>
               </div>
               <div class="flexD-cow">
-                <button class="btn-style btn-chax">查询</button>
+                <button class="btn-style btn-chax" @click="searchput">
+                  查询
+                </button>
                 <button class="btn-style btn-res">重置</button>
               </div>
             </div>
@@ -48,7 +52,12 @@
             <div class="table-div">
               <el-table
                 ref="multipleTableRef"
-                :data="tableData"
+                :data="
+                  tables[0].slice(
+                    (currentPage - 1) * pageSize,
+                    currentPage * pageSize
+                  )
+                "
                 style="width: 100%"
                 :border="true"
                 @selection-change="handleSelectionChange"
@@ -58,22 +67,28 @@
                   width="55"
                   class="warning-row"
                 />
-                <el-table-column property="Xname" label="告警规则名称" />
-                <el-table-column property="Xnum" label="通知用户" />
-                <el-table-column property="Xlei" label="推送方式" />
+                <el-table-column property="alarmRulesName" label="告警规则名称">
+                  <template #default="scope">{{
+                    scope.row.alarmRulesName
+                  }}</template>
+                </el-table-column>
+                <el-table-column property="notifyUsers" label="通知用户" />
+                <el-table-column property="pushMode" label="推送方式" />
                 <el-table-column
                   property="Xaddre"
                   label="告警规则"
                   width="300"
                 />
-                <el-table-column property="Xperson" label="告警类型" />
-                <el-table-column property="Xtai" label="告警等级" />
-                <el-table-column label="创建时间">
-                  <template #default="scope">{{ scope.row.date }}</template>
-                </el-table-column>
+                <el-table-column property="alarmRules" label="告警类型" />
+                <el-table-column property="alarmLevel" label="告警等级" />
+                <el-table-column property="creatTime" label="创建时间" />
                 <el-table-column label="操作">
-                  <el-button @click="handleEdit()">详情</el-button>
-                  <el-button type="danger" @click="handleDelete()"
+                  <router-link to="/showAlarm">
+                    <el-button @click="showshowProject(scope.row)"
+                      >详情</el-button
+                    >
+                  </router-link>
+                  <el-button type="danger" @click="delate(scope.row)"
                     >删除</el-button
                   >
                 </el-table-column>
@@ -83,9 +98,7 @@
             <div class="pagin-div">
               <div class="demo-pagination-block">
                 <el-pagination
-                  v-model:currentPage="currentPage1"
-                  v-model:page-size="pageSize1"
-                  :page-sizes="[10, 20, 30, 40]"
+                  :page-size="pageSize"
                   background
                   layout="total, prev, pager, next,  sizes, jumper"
                   :total="100"
@@ -100,19 +113,135 @@
     </el-container>
   </el-container>
 </template>
-<script setup>
-import { reactive } from "@vue/reactivity";
-import { ref } from "vue";
+<script lang="ts">
+import { ref, onMounted, reactive } from "vue";
 import * as ElIcons from "@element-plus/icons-vue";
+import { getArticle, cancelArticle } from "../../api/configuration.js";
 import { useRouter } from "vue-router";
-const value = ref("");
 const $router = useRouter();
-function toAdd() {
-  $router.replace({ path: "/addProject" });
-}
-// function handleEdit() {
-//   $router.replace({ path: "/addProject" });
-// }
+const value = ref("");
+export default {
+  data() {
+    return {
+      dialogFormVisible: false,
+      currentPage: 1,
+      pageSize: 6,
+      searchContent: "",
+      inputContent: "",
+      selMsg: [],
+      cancelParm: {
+        title: "",
+      },
+    };
+  },
+  setup() {
+    // 访客列表数据
+    const tableData1 = reactive([]);
+    // 访客列表总数
+    let count1 = 0;
+
+    // 获取访客需要的参数
+    let getVisitorParms = {
+      limit: "2", // 获取第几页的数据
+      page: "1", // 获取几条数据
+    };
+
+    onMounted(() => {
+      // 调用获取访客的函数
+      getArticleData();
+    });
+    // 获取访客的异步函数
+    async function getArticleData() {
+      // 发送请求 接受请求回来的数据 并且重命名为 res
+      const { data: res } = await getArticle(getVisitorParms);
+      // 返回的数据展开 push到数组中
+      tableData1.push(...res.data);
+      // 总数重新赋值
+      count1 = res.count;
+      console.log(tableData1);
+      console.log(res.data);
+    }
+    return {
+      tableData1,
+    };
+  },
+  components: {},
+
+  computed: {
+    tables() {
+      const search = this.searchContent;
+      if (this.inputContent == "") {
+        this.searchContent = "";
+        this.currentPage = 1;
+        return [this.tableData1, (this.count = this.tableData1.length)];
+      }
+      if (search !== "") {
+        return [
+          this.tableData1.filter((dataNews) => {
+            return Object.keys(dataNews).some((key) => {
+              return String(dataNews[key]).toLowerCase().indexOf(search) > -1;
+            });
+          }),
+          (this.count = this.tableData1.filter((dataNews) => {
+            return Object.keys(dataNews).some((key) => {
+              return String(dataNews[key]).toLowerCase().indexOf(search) > -1;
+            });
+          }).length),
+        ];
+      }
+      return [this.tableData1, (this.count = this.tableData1.length)];
+    },
+  },
+  methods: {
+    addOk() {
+      this.dialogFormVisible = false;
+    },
+    addCancel() {
+      this.dialogFormVisible = false;
+    },
+    handleSizeChange(val) {
+      this.pageSize = val;
+    },
+    handleCurrentChange(val) {
+      this.currentPage = val;
+    },
+    //搜索
+    searchput() {
+      this.searchContent = this.inputContent;
+    },
+    // 重置搜索框内容
+    reStart() {
+      this.inputContent = "";
+    },
+    //获取选中的行数据
+    delate(row) {
+      console.log(row.alarmRulesName);
+      this.cancelParm.alarmRulesName = row.alarmRulesName;
+      console.log(this.cancelParm);
+      let pk = this.cancelParm;
+      console.log(pk);
+      mycancel();
+      async function mycancel() {
+        // 发送请求 接受请求回来的数据 并且重命名为 res
+        const { data: res } = await cancelArticle(pk);
+        console.log(res);
+        console.log(111);
+        location.reload();
+      }
+    },
+  },
+};
+const multipleTableRef = ref<InstanceType<typeof ElTable>>();
+const multipleSelection = ref<User[]>([]);
+const toggleSelection = (rows?: User[]) => {
+  if (rows) {
+    rows.forEach((row) => {
+      multipleTableRef.value!.toggleRowSelection(row, undefined);
+    });
+  } else {
+    multipleTableRef.value!.clearSelection();
+  }
+};
 const options = [
   {
     value: "Option1",

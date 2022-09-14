@@ -3,7 +3,7 @@
     <el-header>
       <div class="title">
         <span class="headerimg"></span>
-        <span class="headerTitle">告警规则详情</span>
+        <span class="headerTitle">新增告警规则</span>
       </div>
       <span>
         <el-button type="warning" @click="close">关闭</el-button>
@@ -21,7 +21,7 @@
               size="large"
             >
               <el-input
-                v-model="leftFormData.projectName"
+                v-model="FormData.alarmLevel"
                 placeholder="请输入告警规则名称"
               />
             </el-form-item>
@@ -34,7 +34,7 @@
                 >
                   <el-input
                     oninput="value=value.replace(/[^\d.]/g,'')"
-                    v-model="leftFormData.phone"
+                    v-model="FormData.alarmRules"
                     placeholder="请输入通知用户"
                   />
                 </el-form-item>
@@ -47,6 +47,7 @@
                   >
                     <el-option
                       v-for="item in userTypeoptions"
+                      v-model="FormData.title"
                       :key="item.value"
                       :label="item.label"
                       :value="item.value"
@@ -83,6 +84,7 @@
                       :key="item.value"
                       :label="item.label"
                       :value="item.value"
+                      v-model="FormData.title"
                     />
                   </el-select>
                 </el-form-item>
@@ -102,6 +104,7 @@
                       :key="item.value"
                       :label="item.label"
                       :value="item.value"
+                      v-model="FormData.title"
                     />
                   </el-select>
                 </el-form-item>
@@ -113,10 +116,10 @@
                   <div class="demo-date-picker">
                     <div class="block">
                       <el-date-picker
-                        v-model="value2"
                         type="date"
                         placeholder="请选择日期时间"
                         :size="size"
+                        v-model="FormData.title"
                       />
                     </div>
                   </div>
@@ -126,7 +129,7 @@
           </div>
           <div>
             <el-form-item label="项目地址：" prop="projectName" size="large">
-              <el-input v-model="leftFormData.name" />
+              <el-input v-model="FormData.name" />
             </el-form-item>
             <el-col :span="14">
               <img
@@ -439,7 +442,41 @@
 import { reactive, ref } from "@vue/reactivity";
 import { ElMessageBox } from "element-plus";
 import { useRouter } from "vue-router";
+import { getArticle, cancelArticle } from "../../api/configuration.js";
 const $router = useRouter();
+
+//左侧数据
+const FormData = reactive({
+  alarmLevel: "",
+  alarmRules: "",
+  alarmRulesId: "",
+  alarmRulesName: "",
+  alarmType: "",
+  creatTime: "",
+  notifyUsers: "",
+  pushMode: "",
+  title: "",
+  type: "",
+});
+const save = () => {
+  console.log(FormData);
+  addData();
+};
+const cancel = () => {
+  FormData.keyword = "";
+  FormData.content = "";
+  FormData.releaseChannel = "";
+  FormData.releaseWay = "";
+  FormData.synopsis = "";
+  FormData.title = "";
+  FormData.type = "";
+};
+// 添加数据的异步函数
+async function addData() {
+  // 发送请求 接受请求回来的数据 并且重命名为 res
+  const { data: res } = await addArticle(FormData);
+  console.log(res);
+}
 
 const userTypeoptions = [
   {

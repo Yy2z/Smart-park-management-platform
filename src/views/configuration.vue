@@ -51,7 +51,6 @@ const menuData = reactive([
   {
     id: 1,
     authName: "项目管理",
-    path: "/configurationall",
   },
   {
     id: 2,

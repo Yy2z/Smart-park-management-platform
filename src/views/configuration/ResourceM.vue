@@ -99,7 +99,6 @@
 <script setup>
 import { reactive } from "@vue/reactivity";
 import { ref } from "vue";
-import { useRouter } from "vue-router";
 import * as ElIcons from "@element-plus/icons-vue";
 const value = ref("");
 const options = [

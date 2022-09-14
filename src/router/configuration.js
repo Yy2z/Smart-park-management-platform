@@ -18,10 +18,22 @@ export default [
       path: '/AlarmR',
       component: () => import('../views/configuration/AlarmR.vue')
     },
+    {
+      path: '/addAlarm',
+      component: () => import('../views/configuration/addAlarm.vue')
+    },
+    {
+      path: '/showAlarm',
+      component: () => import('../views/configuration/showAlarm.vue')
+    },
     // 操作日志
     {
       path: '/OperationL',
           component: () => import('../views/configuration/OperationL.vue')
+    },
+    {
+      path: '/showOperationL',
+      component: () => import('../views/configuration/showOperationL.vue')
     },
     // 组织管理
     {
