@@ -15,5 +15,8 @@ npm run build
 
 ![](https://cdn6.axureshop.com/wp-content/uploads/2022/02/90868-120542273370.png)
 
+## axure原型地址
+
+  https://demo.axureshop.com/?url=https://www.axureshop.com/demo/1968221/&buyurl=https://www.axureshop.com/a/1968221.html&btwaf=81568502
 
 
